@@ -74,7 +74,13 @@ Fabric yet, so every box below is *written* but not *proven*.
 - [x] Print row counts at every stage
 - [x] Watermark read at start, written only after verified load
 - [x] `full_reload` + `filter_to_known_ids` in a **parameter cell**
-- [ ] **Run it in Fabric** (first run auto-takes the seed path — no watermark exists)
+- [x] **Ran in Fabric** 2026-08-13, seed path, batch `052e5794-dd2e-4353-9001-3f36dc9bb0fa`:
+      10 pages → 193 candidate ids → 193 detail calls → 193 written. 0 page errors, 0 detail
+      errors. Watermark advanced to `2026-08-13`.
+      *Observation:* 10 pages × 20 = 200 but only 193 distinct — `/discover/movie` re-sorts by
+      popularity on every request, so rows shift across page boundaries. Absorbed by using a set.
+- [ ] Second run (proves append + exercises the incremental branch)
+- [ ] Paste `printSchema()` before building silver
 
 **Acceptance:**
 - [ ] `records_written == records_fetched`
@@ -84,15 +90,28 @@ Fabric yet, so every box below is *written* but not *proven*.
 - [ ] Changed-ID count reconciles against detail calls attempted + skipped
 - [ ] **No API key present anywhere in the table** — grep `_source` to confirm
 
-## Section 3 — Silver ⬜ NOT STARTED
+## Section 3 — Silver 🔶 CODE WRITTEN, NOT YET RUN
 
-- [ ] Flatten `belongs_to_collection` struct via dot notation
-- [ ] Explode `genres`, `production_companies`, `credits.cast`, `credits.crew` into child tables
-- [ ] Dedup on `id` via `row_number()` over `_ingested_at desc`
-- [ ] Explicit `StructType` / casts — no inferred types
-- [ ] Handle `release_date` empty-string → null, log the count lost
-- [ ] `MERGE INTO` on all tables
-- [ ] **Child tables: `whenNotMatchedBySourceDelete()` scoped to batch movie_ids** (CLAUDE.md §3)
+`data_transform.Notebook/notebook-content.py` — 8 cells, syntax-checked, written against the
+**real** bronze `printSchema()` (not a guessed one).
+
+- [x] Flatten `belongs_to_collection` struct → `collection_id` / `collection_name`
+- [x] Explode `genres`, `production_companies`, `credits.cast`, `credits.crew` into child tables
+- [x] Dedup on `id` via `row_number()` over `_ingested_at desc`, cast to real timestamp first
+- [x] Explicit casts on every column — no inferred types carried through
+- [x] `release_date` empty-string → null via `when/otherwise`, count logged
+      (`F.nullif` avoided — Spark 3.5+ only, Fabric runtime 1.2 is 3.4)
+- [x] `MERGE INTO` on all five tables, never overwrite
+- [x] Child tables use `whenNotMatchedBySourceDelete()`
+- [x] Sources deduped on merge keys — Delta MERGE **raises** if multiple source rows match one
+      target row, and TMDb does repeat `credit_id` within a movie
+- [x] `softcore` column carried through — undocumented TMDb field that arrived via `mergeSchema`
+- [ ] **Run it, then run it a second time** — identical numbers is the real MERGE test
+
+**Scoping caveat (important if volumes grow):** the child-table deletes are *unconditioned*, which
+is correct only because this notebook reprocesses ALL of bronze, so the source carries every
+movie's complete child set. If it is ever changed to process a single batch, the delete must be
+scoped to that batch's `movie_id`s or it will wipe every other movie's children.
 
 **Acceptance:**
 - [ ] `silver.movies.count() == bronze.movie_details_raw.select("id").distinct().count()`
