@@ -3,7 +3,12 @@
 Live status tracker. Design rationale lives in [CLAUDE.md](CLAUDE.md); this file is just
 *what's done*. Update it at the end of every session before context is lost.
 
-**Workspace:** `movies` (id `d78dd0c7-584e-417f-8893-4f4dd090b375`)
+**Workspace:** ⚠️ being recreated — `movies` (`d78dd0c7-584e-417f-8893-4f4dd090b375`) was created as a
+**Template app workspace**, which hides Source control entirely and does not support Direct Lake
+semantic models. Per Microsoft docs this is **irreversible**, so the workspace is being rebuilt as
+a normal workspace and reconnected to the same repo. Recreating is cheap right now because no data
+has been ingested and both notebooks live in Git.
+**Lesson:** when creating a Fabric workspace, leave *Advanced → Develop a template app* unticked.
 **Lakehouse:** `movies_lh` — schema-enabled, default schema `dbo`
 **Notebooks:** `data_ingest`, `data_transform`
 **Git:** `LanreAdetola/movies_fabric` @ `main` — connected and committing
@@ -45,7 +50,14 @@ Live status tracker. Design rationale lives in [CLAUDE.md](CLAUDE.md); this file
 - [ ] Confirm the same call works from inside a Fabric notebook (runs as submitting user — same
       identity, so it should; verify anyway before building on it)
 - [ ] Create Fabric Environment (only if libraries beyond runtime default are needed)
-- [ ] Note capacity type (trial F64 / paid SKU) — drives the concurrency errors in §7
+- [x] Capacity noted — **`FTL4`, Fabric Trial**, Switzerland North
+      (capacity id `c99a0787-233c-46b9-a327-cdccfb22f877`). Trial concurrency limits apply, so
+      expect `[TooManyRequestsForCapacity]` / HTTP 430 → cancel stuck sessions in Monitoring Hub.
+
+**Git workflow gotcha (learned 2026-08-13):** Fabric disables **Commit** while there are incoming
+changes. With edits pending in both directions the order is always **Update first, then Commit**.
+Also: the Source control button lives on the *workspace item list*, not inside an item, and does
+not exist at all in My workspace ("Template app workspaces are not supported").
 
 ## Section 2 — Bronze 🔶 CODE WRITTEN, NOT YET RUN
 

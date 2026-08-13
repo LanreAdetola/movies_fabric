@@ -8,12 +8,12 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "60548a93-566e-4621-93fd-71406dc7ae2a",
+# META       "default_lakehouse": "64cc823f-d507-4130-8899-0302c1dae06d",
 # META       "default_lakehouse_name": "movies_lh",
-# META       "default_lakehouse_workspace_id": "d78dd0c7-584e-417f-8893-4f4dd090b375",
+# META       "default_lakehouse_workspace_id": "9727ed9e-8b3f-4be3-82fb-94cc0590786c",
 # META       "known_lakehouses": [
 # META         {
-# META           "id": "60548a93-566e-4621-93fd-71406dc7ae2a"
+# META           "id": "64cc823f-d507-4130-8899-0302c1dae06d"
 # META         }
 # META       ]
 # META     }
