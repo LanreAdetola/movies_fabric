@@ -23,9 +23,7 @@
 # MARKDOWN ********************
 
 # # data_ingest — bronze layer
-#
 # TMDb → `Files/bronze/` → `bronze.movie_changes_raw` + `bronze.movie_details_raw`
-#
 # Two-stage ingestion: `/movie/changes` yields IDs only, so we fan out to `/movie/{id}` for the
 # actual payload. Bronze is an append-only log — re-runs add history, dedup happens in silver.
 
