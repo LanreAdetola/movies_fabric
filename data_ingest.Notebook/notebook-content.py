@@ -398,3 +398,27 @@ print("=" * 60)
 # META   "language": "python",
 # META   "language_group": "synapse_pyspark"
 # META }
+
+# CELL ********************
+
+b = spark.table("bronze.movie_details_raw")
+c = spark.table("bronze.movie_changes_raw")
+
+print("detail rows      :", b.count())                              # expect 193
+print("distinct movies  :", b.select("id").distinct().count())      # expect 193
+print("batches          :", b.select("_batch_id").distinct().count())  # expect 1
+print("changes rows     :", c.count())
+
+# the secret must not have reached the table
+print("api_key leaks    :", b.filter(b._source.contains("api_key=") &
+                                     ~b._source.contains("<redacted>")).count())   # must be 0
+
+b.printSchema()
+
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
